@@ -95,7 +95,7 @@ noremap <expr> ? <SID>imactivate(0, '?')
 "noremap gz G
 "noremap qf gf
 
-let s:mapkeys = ['i', 'I', 'a', 'A', 'o', 'O', 's', 'S', 'c', 'C', 'r', 'R', '/', '?', 'f', 'F', 't', 'T']
+let s:mapkeys = ['i','I','a','A','o','O','s','S','c','C','r','R','/','?','f','F','t','T']
 
 function! s:explicitmap(prefix)
   let prefixupper = toupper(a:prefix)
@@ -109,5 +109,5 @@ function! s:explicitmap(prefix)
 endfunction
 
 if !get(g:, 'explicitimi_no_default_key_mappings', 0)
-  call s:explicitmap('g')
+  call s:explicitmap(g:explicitimi_prefixkey)
 endif
