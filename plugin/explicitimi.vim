@@ -42,6 +42,13 @@ let s:activatefunc = function(explicitimi_activatefunc)
 let s:imiforc = 0
 let s:ccmd = 0
 
+function! s:esc()
+  set iminsert=0 imsearch=0
+  call s:reset_ccmd()
+endfunction
+
+inoremap <script> <silent> <Plug>(explicitimi-esc) <ESC>:call <SID>esc()<CR>
+
 function! s:imactivate(active, cmd)
   call s:activatefunc(a:active)
   if a:cmd ==? 'c'
@@ -60,27 +67,20 @@ function! s:imcontrol_c()
   if s:ccmd == 1
     call s:activatefunc(s:imiforc)
   endif
+endfunction
+
+function! s:reset_ccmd()
   let s:ccmd = 0
 endfunction
 
 augroup ExplicitImi
   autocmd!
   autocmd InsertEnter * call <SID>imcontrol_c()
+  autocmd InsertLeave * call <SID>reset_ccmd()
 augroup END
-
-function! s:SetIgnoreThisCmd(cmd)
-  let s:ccmd = 0
-  return a:cmd
-endfunction
 
 noremap <expr> c <SID>imactivate(0, 'c')
 noremap <expr> C <SID>imactivate(0, 'C')
-nnoremap <expr> a <SID>SetIgnoreThisCmd('a')
-nnoremap <expr> A <SID>SetIgnoreThisCmd('A')
-nnoremap <expr> i <SID>SetIgnoreThisCmd('i')
-nnoremap <expr> I <SID>SetIgnoreThisCmd('I')
-nnoremap <expr> o <SID>SetIgnoreThisCmd('o')
-nnoremap <expr> O <SID>SetIgnoreThisCmd('O')
 
 " gr,gf,gtで一度IMオンにするとそのままになるので、r,f,tでは明示的にオフに
 noremap <expr> r <SID>imactivate(0, 'r')
