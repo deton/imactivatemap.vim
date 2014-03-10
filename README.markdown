@@ -29,7 +29,7 @@ viを使い始めた時に`i`を打つのを面倒に感じたのと同様に、
 デフォルトでは、日本語入力IMオンにして編集を開始する以下のキーをmapします。
 (`gI`と`GI`は同じです。他も同様。シフトキー押しっぱなしの方が入力しやすいので。
 `gI`だけmapして`GI`をmapしたくない場合は、
-~/.vimrcで`let g:explicitimi_mapuppercase = 0`と設定してください)
+~/.vimrcで`let g:imactivatemap_mapuppercase = 0`と設定してください)
 * `gi`
 * `gI`
 * `GI`
@@ -59,9 +59,9 @@ viを使い始めた時に`i`を打つのを面倒に感じたのと同様に、
 
 デフォルトでは、打ちやすさを考慮して`g`に割り当てていますが、
 `gi`, `gI`, `ga`, `go`, `gs`, `gr`, `gR`, `gf`, `gt`を上書きしてしまいます。
-他のキーに割り当てるには、`g:explicitimi_prefixkey`を設定してください。
+他のキーに割り当てるには、`g:imactivatemap_prefixkey`を設定してください。
 ```
-  let g:explicitimi_prefixkey = 'q'
+  let g:imactivatemap_prefixkey = 'q'
 ```
 候補となるキー:
 * `q`: 少し打ちにくい。
@@ -70,5 +70,5 @@ viを使い始めた時に`i`を打つのを面倒に感じたのと同様に、
 
 tcvimeでの設定例:
 ```vim
-let explicitimi_activatefunc = 'tcvime#Activate'
+let imactivatemap_activatefunc = 'tcvime#Activate'
 ```
