@@ -1,21 +1,21 @@
 " vi:set ts=8 sts=2 sw=2 tw=0:
 scriptencoding utf-8
 
-" explicitimi.vim - 日本語IMオンにして編集開始するコマンドを別に定義。
+" imactivatemap.vim - 日本語IMオンにして編集開始するコマンドを別に定義。
 " Maintainer: KIHARA Hideto <deton@m1.interq.or.jp>
-" Last Change: 2014-03-10
+" Last Change: 2014-03-11
 
-if exists('g:loaded_explicitimi')
+if exists('g:loaded_imactivatemap')
   finish
 endif
-let g:loaded_explicitimi = 1
+let g:loaded_imactivatemap = 1
 
-if !exists('g:explicitimi_prefixkey')
-  let g:explicitimi_prefixkey = 'g'
+if !exists('g:imactivatemap_prefixkey')
+  let g:imactivatemap_prefixkey = 'g'
 endif
 
-if !exists('g:explicitimi_mapuppercase')
-  let g:explicitimi_mapuppercase = 1
+if !exists('g:imactivatemap_mapuppercase')
+  let g:imactivatemap_mapuppercase = 1
 endif
 
 " 日本語入力IMをオンにしてInsert modeを開始するためのNormal modeモード用map。
@@ -34,10 +34,10 @@ function! s:activatefunc_default(active)
   endif
 endfunction
 
-if !exists('explicitimi_activatefunc')
-  let explicitimi_activatefunc = 's:activatefunc_default'
+if !exists('imactivatemap_activatefunc')
+  let imactivatemap_activatefunc = 's:activatefunc_default'
 endif
-let s:activatefunc = function(explicitimi_activatefunc)
+let s:activatefunc = function(imactivatemap_activatefunc)
 
 let s:imiforc = 0
 let s:ccmd = 0
@@ -47,7 +47,7 @@ function! s:esc()
   call s:reset_ccmd()
 endfunction
 
-inoremap <script> <silent> <Plug>(explicitimi-esc) <ESC>:call <SID>esc()<CR>
+inoremap <script> <silent> <Plug>(imactivatemap-esc) <ESC>:call <SID>esc()<CR>
 
 function! s:imactivate(active, cmd)
   call s:activatefunc(a:active)
@@ -73,7 +73,7 @@ function! s:reset_ccmd()
   let s:ccmd = 0
 endfunction
 
-augroup ExplicitImi
+augroup ImActivateMap
   autocmd!
   autocmd InsertEnter * call <SID>imcontrol_c()
   autocmd InsertLeave * call <SID>reset_ccmd()
@@ -97,17 +97,17 @@ noremap <expr> ? <SID>imactivate(0, '?')
 
 let s:mapkeys = ['i','I','a','A','o','O','s','S','c','C','r','R','/','?','f','F','t','T']
 
-function! s:explicitmap(prefix)
+function! s:imactivatemap(prefix)
   let prefixupper = toupper(a:prefix)
   for key in s:mapkeys
     " nnoremapだとcと組み合わせた際にf,tが使えないのでnoremap
     execute 'noremap <expr> ' . a:prefix . key . ' <SID>imactivate(1, "' . key . '")'
-    if g:explicitimi_mapuppercase && key =~ '\u'
+    if g:imactivatemap_mapuppercase && key =~ '\u'
       execute 'noremap <expr> ' . prefixupper . key . ' <SID>imactivate(1, "' . key . '")'
     endif
   endfor
 endfunction
 
-if !get(g:, 'explicitimi_no_default_key_mappings', 0)
-  call s:explicitmap(g:explicitimi_prefixkey)
+if !get(g:, 'imactivatemap_no_default_key_mappings', 0)
+  call s:imactivatemap(g:imactivatemap_prefixkey)
 endif
