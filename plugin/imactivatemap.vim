@@ -18,9 +18,8 @@ if !exists('g:imactivatemap_mapuppercase')
   let g:imactivatemap_mapuppercase = 1
 endif
 
-" 日本語入力IMをオンにしてInsert modeを開始するためのNormal modeモード用map。
-
 " cf. 'imactivatefunc'
+" ただし、activeが2の場合はimsearchもオンに設定すること。
 function! s:activatefunc_default(active)
   if a:active
     set iminsert=2
@@ -95,19 +94,19 @@ noremap <expr> ? <SID>imactivate(0, '?')
 "noremap gz G
 "noremap qf gf
 
-let s:mapkeys = ['i','I','a','A','o','O','s','S','c','C','r','R','/','?','f','F','t','T']
+let s:mapkeys = ['i','I','a','A','o','O','s','S','c','C','r','R','f','F','t','T']
 
 function! s:imactivatemap(prefix)
   let prefixupper = toupper(a:prefix)
   for key in s:mapkeys
     " nnoremapだとcと組み合わせた際にf,tが使えないのでnoremap
-    execute 'noremap <expr> ' . a:prefix . key . ' <SID>imactivate(1, "' . key . '")'
+    execute 'noremap <expr>' a:prefix . key '<SID>imactivate(1, "' . key . '")'
     if g:imactivatemap_mapuppercase && key =~ '\u'
-      execute 'noremap <expr> ' . prefixupper . key . ' <SID>imactivate(1, "' . key . '")'
+      execute 'noremap <expr>' prefixupper . key '<SID>imactivate(1, "' . key . '")'
     endif
   endfor
+  execute 'noremap <expr>' a:prefix . '/ <SID>imactivate(2, "/")'
+  execute 'noremap <expr>' a:prefix . '? <SID>imactivate(2, "?")'
 endfunction
 
-if !get(g:, 'imactivatemap_no_default_key_mappings', 0)
-  call s:imactivatemap(g:imactivatemap_prefixkey)
-endif
+call s:imactivatemap(g:imactivatemap_prefixkey)
