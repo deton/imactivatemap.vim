@@ -19,24 +19,31 @@ if !exists('g:imactivatemap_mapuppercase')
 endif
 
 " cf. 'imactivatefunc'
-" ただし、activeが2の場合はimsearchもオンに設定すること。
 function! s:activatefunc_default(active)
   if a:active
     set iminsert=2
   else
     set iminsert=0
   endif
-  if a:active == 2
+endfunction
+
+" imsearchのオン/オフの切り替えを行うために呼ぶ関数
+function! s:imsactivatefunc_default(active)
+  if a:active
     set imsearch=2
   else
     set imsearch=0
   endif
 endfunction
 
-if !exists('imactivatemap_activatefunc')
-  let imactivatemap_activatefunc = 's:activatefunc_default'
+if !exists('imactivatemap_imifunc')
+  let imactivatemap_imifunc = 's:activatefunc_default'
 endif
-let s:activatefunc = function(imactivatemap_activatefunc)
+let s:activatefunc = function(imactivatemap_imifunc)
+if !exists('imactivatemap_imsfunc')
+  let imactivatemap_imsfunc = 's:imsactivatefunc_default'
+endif
+let s:imsactivatefunc = function(imactivatemap_imsfunc)
 
 let s:imiforc = 0
 let s:ccmd = 0
@@ -60,6 +67,12 @@ function! s:imactivate(active, cmd)
   return a:cmd
 endfunction
 
+function! s:imsactivate(active, cmd)
+  call s:imsactivatefunc(a:active)
+  " XXX: <C-^>を返すことで切り替えを行う場合用に、戻り値を付加する?
+  return a:cmd
+endfunction
+
 " 'cgtあ'の場合は日本語入力オフにしたい
 " 'gctX'の場合は日本語入力オンにしたい
 function! s:imcontrol_c()
@@ -74,6 +87,7 @@ endfunction
 
 augroup ImActivateMap
   autocmd!
+  "autocmd BufEnter * set iminsert=0 imsearch=0
   autocmd InsertEnter * call <SID>imcontrol_c()
   autocmd InsertLeave * call <SID>reset_ccmd()
 augroup END
@@ -87,8 +101,8 @@ noremap <expr> f <SID>imactivate(0, 'f')
 noremap <expr> F <SID>imactivate(0, 'F')
 noremap <expr> t <SID>imactivate(0, 't')
 noremap <expr> T <SID>imactivate(0, 'T')
-noremap <expr> / <SID>imactivate(0, '/')
-noremap <expr> ? <SID>imactivate(0, '?')
+noremap <expr> / <SID>imsactivate(0, '/')
+noremap <expr> ? <SID>imsactivate(0, '?')
 
 " G, gi, gI, ga, go, gs, gr, gf, gtを上書き。
 "noremap gz G
@@ -105,8 +119,9 @@ function! s:imactivatemap(prefix)
       execute 'noremap <expr>' prefixupper . key '<SID>imactivate(1, "' . key . '")'
     endif
   endfor
-  execute 'noremap <expr>' a:prefix . '/ <SID>imactivate(2, "/")'
-  execute 'noremap <expr>' a:prefix . '? <SID>imactivate(2, "?")'
+  " `/`,`?`は&imsを設定。&imiを設定すると直後の`a`等に影響するので
+  execute 'noremap <expr>' a:prefix . '/ <SID>imsactivate(1, "/")'
+  execute 'noremap <expr>' a:prefix . '? <SID>imsactivate(1, "?")'
 endfunction
 
 call s:imactivatemap(g:imactivatemap_prefixkey)
