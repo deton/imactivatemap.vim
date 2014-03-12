@@ -12,15 +12,9 @@ vi的には、日本語入力IMオンにしてInsert modeを開始するコマ�
 
 さらに、Insert modeのままでのIMオン/オフ切り替えは使わずに、
 オンに切り替えたい場合は一度Insert modeを抜ける形にするのがvi的かもしれません。
-この際には、以下のようにInsert modeを抜けるとオフになるように設定しておく想定です。
-```
- imap <silent> <unique> <ESC> <ESC>:set imsearch=0 iminsert=0<CR>
-```
 つまり、以下の2種類のコマンドとみなす形。
 * `i`で始まり、ASCII文字列を入力して、`ESC`で終わるコマンド。
 * `gi`で始まり、日本語文字列を入力して、`ESC`で終わるコマンド。
-
-例えば、「まだ」を入力するコマンドとして、`giまだESC`というシーケンス。
 
 ## 特徴
 
@@ -101,6 +95,11 @@ IM切り替えを行う関数を定義して、
 関数の引数は`'imactivatefunc'`と同じです。
 
 ## 設定例: tcvime(1.5.0)の場合
+以下のようにInsert modeを抜けるとIMオフになるように設定しておいてください。
+```
+ imap <silent> <unique> <ESC> <ESC>:set imsearch=0 iminsert=0<CR>
+```
+
 tcvimeは`keymap`を使うので、
 tcvime#Activate()では、`&iminsert`の値を1や0に設定しています。
 
@@ -123,6 +122,8 @@ function! ImActivateMapImsFunc(active)
 endfunction
 let imactivatemap_imsfunc = 'ImActivateMapImsFunc'
 let imactivatemap_imifunc = 'tcvime#Activate'
+" imap <silent> <unique> <ESC> <ESC>:set imsearch=0 iminsert=0<CR>
+imap <silent> <unique> <ESC> <Plug>(imactivatemap-esc)
 ```
 
 ## 関連
