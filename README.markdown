@@ -26,7 +26,9 @@ vi的には、日本語入力IMオンにしてInsert modeを開始するコマ�
 
 * 新たなモードの追加無しに、vi操作中に日本語編集を融合
   ([日本語入力固定モード](https://sites.google.com/site/fudist/Home/vim-nihongo-ban/vim-japanese/ime-control)
-  のように、日本語固定モードと英語固定モードを追加して切り替えるのではなく)
+  のように、IMEオン固定モードとIMEオフ固定モードを追加して切り替えるのではなく)
+ * `が`までの文字列をIMオフで編集する`cgtが`や、
+   `h`までの文字列をIMオンで編集する`gcth`等の組み合わせも可。
 * 現在の日本語入力モードがオンかオフかを意識しなくてもいい。
   `ga`でInsert modeを始めれば常に日本語入力オンで入力できるし、
   `a`で始めれば常に日本語入力オフで入力できる。
@@ -59,35 +61,9 @@ Insert modeを抜けてもオフにしない方がいいかもしれません。
 
 ## mapするキー
 デフォルトでは、日本語入力IMオンにして編集を開始する以下のキーをmapします。
-(`gI`と`GI`は同じです。他も同様。シフトキー押しっぱなしの方が入力しやすいので。
-`gI`だけmapして`GI`をmapしたくない場合は、
-~/.vimrcで`let g:imactivatemap_mapuppercase = 0`と設定してください)
-* `gi`
-* `gI`
-* `GI`
-* `ga`
-* `gA`
-* `GA`
-* `go`
-* `gO`
-* `GO`
-* `gs`
-* `gS`
-* `GS`
-* `gc`
-* `gC`
-* `GC`
-* `gr`
-* `gR`
-* `GR`
-* `g/`
-* `g?`
-* `gf`
-* `gF`
-* `GF`
-* `gt`
-* `gT`
-* `GT`
+* `gi`, `gI`, `ga`, `gA`, `go`, `gO`, `gs`, `gS`, `gc`, `gC`, `gr`, `gR`
+* `gf`, `gF`, `gt`, `gT`
+* `g/`, `g?`
 
 デフォルトでは、打ちやすさを考慮して`g`に割り当てていますが、
 `gi`, `gI`, `ga`, `go`, `gs`, `gr`, `gR`, `gf`, `gt`を上書きしてしまいます。
@@ -100,7 +76,34 @@ Insert modeを抜けてもオフにしない方がいいかもしれません。
 * `m`: `ma`等はよく使うので、指が意識せずに動いてしまっていまいち。
 * `s`: `cl`で代替可能なので。ただ個人的に`s`はよく使うのでつぶしたくない。
 
-tcvimeでの設定例:
+また、`gI`よりも`GI`のようにシフトキー押しっぱなしの方が入力しやすい気がするので、
+`GI`も`gI`と同じ機能にmapしたい場合は(`GA`等に関しても同様)、
+~/.vimrcで`let g:imactivatemap_mapuppercase = 1`と設定してください。
+
+## IMのオン/オフの切り替え制御
+IMのオン/オフの切り替え制御は、デフォルトでは
+`&iminsert`や`&imsearch`(`/`,`?`向け)の値を2や0に設定することで行います。
+(Windowsのgvimの場合など。)
+
+その他のIM切り替え方法に関しては、以下を参考にしてください。
+
+* [日本語入力固定モード](https://sites.google.com/site/fudist/Home/vim-nihongo-ban/vim-japanese/ime-control)
+* `'imactivatekey'`関係
+ * https://github.com/koron/imcsc-vim/
+ * [Ubuntu上のVimでIME(ibus制御)](http://www.kaoriya.net/blog/2013/07/15/)
+ * [CUIでもimaf/imsfを使いたい - Issue #444 - vim-jp/issues - GitHub](https://github.com/vim-jp/issues/issues/444)
+
+IM切り替え方法のカスタマイズをしたい場合は、
+IM切り替えを行う関数を定義して、
+その関数名を`imactivatemap_imifunc`や`imactivatemap_imsfunc`に設定してください
+(以下の設定例も参考)。
+
+関数の引数は`'imactivatefunc'`と同じです。
+
+## 設定例: tcvime(1.5.0)の場合
+tcvimeは`keymap`を使うので、
+tcvime#Activate()では、`&iminsert`の値を1や0に設定しています。
+
 ```vim
 " g/, g?, /, ?の検索でIMのオン/オフを切り替えるため、imsearchをセットする関数
 function! ImActivateMapImsFunc(active)
@@ -115,6 +118,7 @@ function! ImActivateMapImsFunc(active)
   " keymap未設定時はロードが必要
   call tcvime#Activate(1)
   set imsearch=1
+  " tcvime#Activate(1)で&imi=1になるが、g/直後のa等ではオフにしておきたいので
   call tcvime#Activate(0)
 endfunction
 let imactivatemap_imsfunc = 'ImActivateMapImsFunc'

@@ -15,7 +15,7 @@ if !exists('g:imactivatemap_prefixkey')
 endif
 
 if !exists('g:imactivatemap_mapuppercase')
-  let g:imactivatemap_mapuppercase = 1
+  let g:imactivatemap_mapuppercase = 0
 endif
 
 " cf. 'imactivatefunc'
