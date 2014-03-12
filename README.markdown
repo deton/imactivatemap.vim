@@ -1,7 +1,8 @@
 # Vimでの日本語入力・編集用に別コマンドを割り当てる
 
 日本語入力IMをオンにしてInsert modeを開始するためのNormal modeモード用mapです。
-日本語を編集したい、というのは、Insert modeに入る際には意識しているので。
+日本語を編集したい、というのは、Insert modeに入る際には意識しているので、
+その意図を直接表現するコマンドを用意すると操作が気持ち良くできるかと思って作ってみました。
 
 [`c`,`s`,`r`コマンドで、書き換え前の文字列に応じてIMオン/オフを切り替えるVimプラグインを作った](http://qiita.com/deton/items/ce21f80265753134e7e9)のですが、
 日本語入力オン/オフが意図から外れる場合がたまにあってストレスになるので、
@@ -15,17 +16,48 @@ vi的には、日本語入力IMオンにしてInsert modeを開始するコマ�
 ```
  imap <silent> <unique> <ESC> <ESC>:set imsearch=0 iminsert=0<CR>
 ```
-つまり、
-* `i`で始まり、ASCII文字列を入力して、`ESC`で終わるコマンドと、
-* `gi`で始まり、日本語文字列を入力して、`ESC`で終わるコマンドとみなす形。
+つまり、以下の2種類のコマンドとみなす形。
+* `i`で始まり、ASCII文字列を入力して、`ESC`で終わるコマンド。
+* `gi`で始まり、日本語文字列を入力して、`ESC`で終わるコマンド。
 
-ただし、日本語入力メインで行う場合は、`i`のかわりに`gi`を打つのは面倒なので、
+例えば、「まだ」を入力するコマンドとして、`giまだESC`というシーケンス。
+
+## 特徴
+
+* 新たなモードの追加無しに、vi操作中に日本語編集を融合
+  ([日本語入力固定モード](https://sites.google.com/site/fudist/Home/vim-nihongo-ban/vim-japanese/ime-control)
+  のように、日本語固定モードと英語固定モードを追加して切り替えるのではなく)
+* 現在の日本語入力モードがオンかオフかを意識しなくてもいい。
+  `ga`でInsert modeを始めれば常に日本語入力オンで入力できるし、
+  `a`で始めれば常に日本語入力オフで入力できる。
+* Insert mode中で日本語入力オンオフ切り替え操作をしなくていい。
+  かわりに`ESC`で抜けてInsert modeに入り直す操作が多くなるが。
+
+## 欠点
+
+日本語入力メインで行う場合は、`i`のかわりに`gi`を打つのは面倒なので、
 Insert modeを抜けてもオフにしない方がいいかもしれません。
 その場合は、日本語入力オフでInsert modeを開始するコマンドを、
 `qi`等に割り当てておくのがいいかも。
+
 このあたりは、viを使い始めた時に`i`を打つのを面倒に感じたのと同様に、
 慣れの問題かもしれないので、しばらく使ってみる予定です。
 
+## 少し使ってみての感想
+
+* Insert modeに入ってからIMを切り替えるよりも、`ga`等のコマンドを使う方が楽な印象。
+  たとえ、`ESC`で抜けて`ga`を押してIMをオンにし直さないといけない場合でも。
+  IM切り替えはコントロールキーを使うからかも。
+* `g/`で直接日本語入力を開始できるのは便利。
+  `CTRL-^`を押して切り替えるのは面倒だったので。
+* 日本語編集をするつもりなのに`gc`でなく`c`を押してしまう場合がよくある。
+  同様に`a`や`i`でも。この場合、一度`ESC`で抜けて`gc`を押し直す形。
+  慣れると意識せずにできるようになるか?
+* 一番良く使うのは`ga`。逆に、日本語入力をするつもりが無いのに押してしまって、
+  一度`ESC`で抜けて`a`を押し直すことも。
+  その他便利なのは`gs`。`gc`は少し考えないとまだ使えない。
+
+## mapするキー
 デフォルトでは、日本語入力IMオンにして編集を開始する以下のキーをmapします。
 (`gI`と`GI`は同じです。他も同様。シフトキー押しっぱなしの方が入力しやすいので。
 `gI`だけmapして`GI`をmapしたくない場合は、
@@ -70,5 +102,28 @@ Insert modeを抜けてもオフにしない方がいいかもしれません。
 
 tcvimeでの設定例:
 ```vim
-let imactivatemap_activatefunc = 'tcvime#Activate'
+" g/, g?, /, ?の検索でIMのオン/オフを切り替えるため、imsearchをセットする関数
+function! ImActivateMapImsFunc(active)
+  if !a:active
+    set imsearch=0
+    return
+  endif
+  if &keymap != ''
+    set imsearch=1
+    return
+  endif
+  " keymap未設定時はロードが必要
+  call tcvime#Activate(1)
+  set imsearch=1
+  call tcvime#Activate(0)
+endfunction
+let imactivatemap_imsfunc = 'ImActivateMapImsFunc'
+let imactivatemap_imifunc = 'tcvime#Activate'
 ```
+
+## 関連
+* [contextimi.vim](https://github.com/deton/contextimi.vim):
+  `c`,`s`,`r`コマンドで、書き換え前の文字列に応じてIMオン/オフを切り替えるVimプラグイン。
+  imactivatemap.vimとの共存は未対応。
+
+* [日本語入力固定モード](https://sites.google.com/site/fudist/Home/vim-nihongo-ban/vim-japanese/ime-control)
