@@ -60,7 +60,7 @@ function! s:imactivate(active, cmd)
   if a:cmd ==? 'c'
     let s:imiforc = a:active
     let s:ccmd = 1
-  elseif s:ccmd == 1 && (a:cmd ==? 'f' || a:cmd ==? 't' || a:cmd == '/' || a:cmd == '?')
+  elseif s:ccmd == 1 && stridx('fFtT', a:cmd) >= 0
   else
     let s:ccmd = 0
   endif
