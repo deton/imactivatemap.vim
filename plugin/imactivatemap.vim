@@ -10,6 +10,7 @@ if exists('g:loaded_imactivatemap')
 endif
 let g:loaded_imactivatemap = 1
 
+" gf等を上書きしたくない場合、g以外のprefixを指定
 if !exists('g:imactivatemap_prefixkey')
   let g:imactivatemap_prefixkey = 'g'
 endif
@@ -63,7 +64,9 @@ function! s:reset()
   call s:reset_isccmd()
 endfunction
 
-inoremap <script> <silent> <Plug>(imactivatemap-esc) <ESC>:call <SID>reset()<CR>
+" Insert modeをEscで抜けるとIMオフになるように設定するには、
+"  imap <silent> <unique> <Esc> <Esc><Plug>(imactivatemap-reset)
+nnoremap <script> <silent> <Plug>(imactivatemap-reset) :<C-U>call <SID>reset()<CR>
 
 " 'a','c','f'等に対してIMオン/オフを行う。
 function! s:imiactivate(active, cmd)
