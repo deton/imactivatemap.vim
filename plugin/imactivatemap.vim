@@ -57,12 +57,13 @@ let s:imsfunc = function(imactivatemap_imsfunc)
 let s:imiforc = 0
 let s:isccmd = 0
 
-function! s:esc()
-  set iminsert=0 imsearch=0
-  call s:reset_isccmd() " InsertLeaveでもしてるけどいちおう
+function! s:reset()
+  call s:imifunc(0)
+  call s:imsfunc(0)
+  call s:reset_isccmd()
 endfunction
 
-inoremap <script> <silent> <Plug>(imactivatemap-esc) <ESC>:call <SID>esc()<CR>
+inoremap <script> <silent> <Plug>(imactivatemap-esc) <ESC>:call <SID>reset()<CR>
 
 " 'a','c','f'等に対してIMオン/オフを行う。
 function! s:imiactivate(active, cmd)
@@ -101,7 +102,7 @@ endfunction
 
 augroup ImActivateMap
   autocmd!
-  "autocmd BufEnter * set iminsert=0 imsearch=0
+  "autocmd BufEnter * call <SID>reset()
   autocmd InsertEnter * call <SID>imcontrol_c()
   autocmd InsertLeave * call <SID>reset_isccmd()
 augroup END
