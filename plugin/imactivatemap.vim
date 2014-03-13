@@ -20,6 +20,12 @@ if !exists('g:imactivatemap_mapuppercase')
   let g:imactivatemap_mapuppercase = 0
 endif
 
+" &imi制御対象にするコマンドの配列
+" (gf,gtを上書きしたくない場合に外す設定ができるように)
+if !exists('imactivatemap_imicmdlist')
+  let imactivatemap_imicmdlist = ['i','I','a','A','o','O','s','S','c','C','r','R','f','F','t','T']
+endif
+
 " iminsertのオン/オフの切り替えを行うために呼ぶ関数
 " cf. 'imactivatefunc'
 function! s:imifunc_default(active)
@@ -100,38 +106,33 @@ augroup ImActivateMap
   autocmd InsertLeave * call <SID>reset_isccmd()
 augroup END
 
-" f,tでIMオンにしても、gcでなくcだったらIMオフにするため
-noremap <expr> c <SID>imiactivate(0, 'c')
-noremap <expr> C <SID>imiactivate(0, 'C')
-
-" gr,gf,gtで一度IMオンにするとそのままになるので、r,f,tでは明示的にオフに
-noremap <expr> r <SID>imiactivate(0, 'r')
-noremap <expr> f <SID>imiactivate(0, 'f')
-noremap <expr> F <SID>imiactivate(0, 'F')
-noremap <expr> t <SID>imiactivate(0, 't')
-noremap <expr> T <SID>imiactivate(0, 'T')
-noremap <expr> / <SID>imsactivate(0, '/')
-noremap <expr> ? <SID>imsactivate(0, '?')
-
 " gi, gI, ga, go, gs, gr, gf, gtを上書き。
 "noremap qf gf
 "noremap gz G
 
-let s:mapkeys = ['i','I','a','A','o','O','s','S','c','C','r','R','f','F','t','T']
+" prefix無しコマンドをmapする必要のあるコマンドの配列。
+" c: gf,gtでIMオンにしても、gcでなくcだったらIMオフにするため(例: 'cgfが')。
+" r,f,t: gr,gf,gtで一度IMオンにするとそのままになるので、r,f,tでは明示的にオフに
+let s:imioffcmdlist = ['c','r','f','F','t','T']
 
 " IMオンで編集開始するためのmapを登録
 function! s:mapimactivate(prefix)
   let prefixupper = toupper(a:prefix)
-  for key in s:mapkeys
+  for cmd in g:imactivatemap_imicmdlist
     " nnoremapだとcと組み合わせた際にf,tが使えないのでnoremap
-    execute 'noremap <expr>' a:prefix . key '<SID>imiactivate(1, "' . key . '")'
-    if g:imactivatemap_mapuppercase && key =~ '\u'
-      execute 'noremap <expr>' prefixupper . key '<SID>imiactivate(1, "' . key . '")'
+    execute 'noremap <expr>' a:prefix . cmd '<SID>imiactivate(1, "' . cmd . '")'
+    if index(s:imioffcmdlist, cmd) >= 0
+      execute 'noremap <expr>' cmd '<SID>imiactivate(0, "' . cmd . '")'
+    endif
+    if g:imactivatemap_mapuppercase && cmd =~ '\u'
+      execute 'noremap <expr>' prefixupper . cmd '<SID>imiactivate(1, "' . cmd . '")'
     endif
   endfor
   " `/`,`?`は&imsを設定。&imiを設定すると直後の`a`等に影響するので
   execute 'noremap <expr>' a:prefix . '/ <SID>imsactivate(1, "/")'
   execute 'noremap <expr>' a:prefix . '? <SID>imsactivate(1, "?")'
+  noremap <expr> / <SID>imsactivate(0, '/')
+  noremap <expr> ? <SID>imsactivate(0, '?')
 endfunction
 
 call s:mapimactivate(g:imactivatemap_prefixkey)
