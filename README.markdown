@@ -1,6 +1,6 @@
 # Vimでの日本語入力・編集用に別コマンドを割り当てる
 
-日本語入力IMをオンにしてInsert modeを開始するためのNormal modeモード用mapです
+日本語入力IMをオンにしてInsert modeを開始するコマンドをNormal mode用にmapするVimプラグインです
 (`i`,`a`,`c`,`o`等に対して、日本語入力オンで開始する`gi`,`ga`,`gc`,`go`等をmap)。
 日本語を編集したい、ということは、Insert modeに入る際には意識しているので、
 その意図を直接表現するコマンドを用意すると操作が気持ち良くできるかと思って作ってみました。
@@ -14,12 +14,12 @@ vi的には、日本語入力IMオンにしてInsert modeを開始するコマ�
 さらに、Insert modeのままでのIMオン/オフ切り替えは使わずに、
 オンに切り替えたい場合は一度Insert modeを抜ける形にするのがvi的かもしれません。
 つまり、以下の2種類のコマンドとみなす形。
-* `i`で始まり、ASCII文字列を入力して、`ESC`で終わるコマンド。
-* `gi`で始まり、日本語文字列を入力して、`ESC`で終わるコマンド。
+* `i`で始まり、ASCII文字列を入力して、`Esc`で終わるコマンド。
+* `gi`で始まり、日本語文字列を入力して、`Esc`で終わるコマンド。
 
 この場合は、以下のようにInsert modeを抜けるとIMオフになるように設定しておいてください。
 ```
- imap <silent> <unique> <ESC> <ESC>:set imsearch=0 iminsert=0<CR>
+ inoremap <silent> <unique> <Esc> <Esc>:set imsearch=0 iminsert=0<CR>
 ```
 
 ## 特徴
@@ -29,13 +29,15 @@ vi的には、日本語入力IMオンにしてInsert modeを開始するコマ�
   のように、IMEオン固定モードとIMEオフ固定モードを追加して切り替えるのではなく)
  * `が`までの文字列をIMオフで編集する`cgtが`や、
    `h`までの文字列をIMオンで編集する`gcth`等の組み合わせも可。
-* 現在の日本語入力モードがオンかオフかを意識しなくてもいい。
-  `ga`でInsert modeを始めれば常に日本語入力オンで入力できるし、
-  `a`で始めれば常に日本語入力オフで入力できる。
-* Insert mode中で日本語入力オンオフ切り替え操作をしなくていい。
-  かわりに`ESC`で抜けてInsert modeに入り直す操作が多くなるが。
+* 現在の日本語入力モードがオンかオフかを意識しなくて良い。
+  `ga`でInsert modeを始めれば常に日本語入力オンで入力できますし、
+  `a`で始めれば常に日本語入力オフで入力できます。
+* Insert mode中で日本語入力オンオフ切り替え操作をしなくて良い。
+  かわりに`Esc`で抜けてInsert modeに入り直す操作が多くなりますが。
 
 ## 欠点
+
+`i`のかわりに`gi`を入力する必要があるので、操作が少し長くなります。
 
 日本語入力メインで行う場合は、`i`のかわりに`gi`を打つのは面倒なので、
 Insert modeを抜けてもオフにしない方がいいかもしれません。
@@ -48,15 +50,15 @@ Insert modeを抜けてもオフにしない方がいいかもしれません。
 ## 少し使ってみての感想
 
 * Insert modeに入ってからIMを切り替えるよりも、`ga`等のコマンドを使う方が楽な印象。
-  たとえ、`ESC`で抜けて`ga`を押してIMをオンにし直さないといけない場合でも。
+  たとえ、`Esc`で抜けて`ga`を押してIMをオンにし直さないといけない場合でも。
   IM切り替えはコントロールキーを使うからかも。
 * `g/`で直接日本語入力を開始できるのは便利。
   `CTRL-^`を押して切り替えるのは面倒だったので。
 * 日本語編集をするつもりなのに`gc`でなく`c`を押してしまう場合がよくある。
-  同様に`a`や`i`でも。この場合、一度`ESC`で抜けて`gc`を押し直す形。
+  同様に`a`や`i`でも。この場合、一度`Esc`で抜けて`gc`を押し直す形。
   慣れると意識せずにできるようになるか?
 * 一番良く使うのは`ga`。逆に、日本語入力をするつもりが無いのに押してしまって、
-  一度`ESC`で抜けて`a`を押し直すことも。
+  一度`Esc`で抜けて`a`を押し直すことも。
   その他便利なのは`gs`。`gc`は少し考えないとまだ使えない。
 * IMオン/オフ操作の必要なVim以外のアプリと操作の統一性が無くなるので、
   意識のスイッチが必要。
@@ -69,7 +71,7 @@ Insert modeを抜けてもオフにしない方がいいかもしれません。
 * `g/`, `g?`
 
 デフォルトでは、打ちやすさを考慮して`g`に割り当てていますが、
-`gi`, `gI`, `ga`, `go`, `gs`, `gr`, `gR`, `gf`, `gt`を上書きしてしまいます。
+`gi`, `gI`, `ga`, `go`, `gs`, `gr`, `gR`, `gf`, `gt`, `g?`を上書きしてしまいます。
 他のキーに割り当てるには、`g:imactivatemap_prefixkey`を設定してください。
 ```
   let g:imactivatemap_prefixkey = 'q'
@@ -103,12 +105,19 @@ IM切り替えを行う関数を定義して、
 
 関数の引数は`'imactivatefunc'`と同じです。
 
-## 設定例: tcvime(1.5.0)の場合
-以下のようにInsert modeを抜けるとIMオフになるように設定しておいてください。
+これらのカスタマイズした関数をIMオフ目的で呼ぶ`<Plug>`として、
+`<Plug>(imactivatemap-reset)`をnnoremapしてあります。
+Insert modeをEscで抜けるとIMオフになるように設定するには、
 ```
- imap <silent> <unique> <ESC> <ESC>:set imsearch=0 iminsert=0<CR>
+ inoremap <silent> <unique> <Esc> <Esc>:set imsearch=0 iminsert=0<CR>
 ```
+のかわりに
+```
+ imap <silent> <unique> <Esc> <Esc><Plug>(imactivatemap-reset)
+```
+と設定してください。
 
+## 設定例: tcvime(1.5.0)の場合
 tcvimeは`keymap`を使うので、
 tcvime#Activate()では、`&iminsert`の値を1や0に設定しています。
 
@@ -131,8 +140,7 @@ function! ImActivateMapImsFunc(active)
 endfunction
 let imactivatemap_imsfunc = 'ImActivateMapImsFunc'
 let imactivatemap_imifunc = 'tcvime#Activate'
-" imap <silent> <unique> <ESC> <ESC>:set imsearch=0 iminsert=0<CR>
-imap <silent> <unique> <ESC> <Plug>(imactivatemap-esc)
+imap <silent> <unique> <Esc> <Esc><Plug>(imactivatemap-reset)
 ```
 
 ## 関連
