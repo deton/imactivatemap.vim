@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " imactivatemap.vim - 日本語IMオンにして編集開始するコマンドを別に定義。
 " Maintainer: KIHARA Hideto <deton@m1.interq.or.jp>
-" Last Change: 2014-03-13
+" Last Change: 2014-03-14
 
 if exists('g:loaded_imactivatemap')
   finish
@@ -114,29 +114,49 @@ augroup END
 "noremap qf gf
 "noremap gz G
 
+let s:imicmdlist = ['i','I','a','A','o','O','s','S','c','C','r','R','f','F','t','T']
+
 " prefix無しコマンドをmapする必要のあるコマンドの配列。
 " c: gf,gtでIMオンにしても、gcでなくcだったらIMオフにするため(例: 'cgfが')。
 " r,f,t: gr,gf,gtで一度IMオンにするとそのままになるので、r,f,tでは明示的にオフに
 let s:imioffcmdlist = ['c','r','f','F','t','T']
 
+" <Plug>をmap
+function! s:mapplug()
+  for cmd in s:imicmdlist
+    " nnoremapだとcと組み合わせた際にf,tが使えないのでnoremap
+    execute 'noremap <expr> <Plug>(imactivatemap-on-' . cmd . ') <SID>imiactivate(1, "' . cmd . '")'
+  endfor
+  for cmd in s:imioffcmdlist
+    execute 'noremap <expr> <Plug>(imactivatemap-off-' . cmd . ') <SID>imiactivate(0, "' . cmd . '")'
+  endfor
+  " `/`,`?`は&imsを設定。&imiを設定すると直後の`a`等に影響するので
+  noremap <expr> <Plug>(imactivatemap-on-/) <SID>imsactivate(1, '/')
+  noremap <expr> <Plug>(imactivatemap-on-?) <SID>imsactivate(1, '?')
+  noremap <expr> <Plug>(imactivatemap-off-/) <SID>imsactivate(0, '/')
+  noremap <expr> <Plug>(imactivatemap-off-?) <SID>imsactivate(0, '?')
+endfunction
+
 " IMオンで編集開始するためのmapを登録
 function! s:mapimactivate(prefix)
   let prefixupper = toupper(a:prefix)
   for cmd in g:imactivatemap_imicmdlist
-    " nnoremapだとcと組み合わせた際にf,tが使えないのでnoremap
-    execute 'noremap <expr>' a:prefix . cmd '<SID>imiactivate(1, "' . cmd . '")'
+    " nmapだとcと組み合わせた際にf,tが使えないのでmap
+    execute 'map' a:prefix . cmd '<Plug>(imactivatemap-on-' . cmd . ')'
     if index(s:imioffcmdlist, cmd) >= 0
-      execute 'noremap <expr>' cmd '<SID>imiactivate(0, "' . cmd . '")'
+      execute 'map' cmd '<Plug>(imactivatemap-off-' . cmd . ')'
     endif
     if g:imactivatemap_mapuppercase && cmd =~ '\u'
-      execute 'noremap <expr>' prefixupper . cmd '<SID>imiactivate(1, "' . cmd . '")'
+      execute 'map' prefixupper . cmd '<Plug>(imactivatemap-on-' . cmd . ')'
     endif
   endfor
-  " `/`,`?`は&imsを設定。&imiを設定すると直後の`a`等に影響するので
-  execute 'noremap <expr>' a:prefix . '/ <SID>imsactivate(1, "/")'
-  execute 'noremap <expr>' a:prefix . '? <SID>imsactivate(1, "?")'
-  noremap <expr> / <SID>imsactivate(0, '/')
-  noremap <expr> ? <SID>imsactivate(0, '?')
+  execute 'map' a:prefix . '/ <Plug>(imactivatemap-on-/)'
+  execute 'map' a:prefix . '? <Plug>(imactivatemap-on-?)'
+  map / <Plug>(imactivatemap-off-/)
+  map ? <Plug>(imactivatemap-off-?)
 endfunction
 
-call s:mapimactivate(g:imactivatemap_prefixkey)
+call s:mapplug()
+if !get(g:, 'imactivatemap_no_default_key_mappings', 0)
+  call s:mapimactivate(g:imactivatemap_prefixkey)
+endif
