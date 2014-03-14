@@ -116,18 +116,12 @@ augroup END
 
 let s:imicmdlist = ['i','I','a','A','o','O','s','S','c','C','r','R','f','F','t','T']
 
-" prefix無しコマンドをmapする必要のあるコマンドの配列。
-" c: gf,gtでIMオンにしても、gcでなくcだったらIMオフにするため(例: 'cgfが')。
-" r,f,t: gr,gf,gtで一度IMオンにするとそのままになるので、r,f,tでは明示的にオフに
-let s:imioffcmdlist = ['c','r','f','F','t','T']
-
 " <Plug>をmap
 function! s:mapplug()
   for cmd in s:imicmdlist
     " nnoremapだとcと組み合わせた際にf,tが使えないのでnoremap
     execute 'noremap <expr> <Plug>(imactivatemap-on-' . cmd . ') <SID>imiactivate(1, "' . cmd . '")'
-  endfor
-  for cmd in s:imioffcmdlist
+    " offもmap。gr,gf,gt直後にa等した際にオフにするため
     execute 'noremap <expr> <Plug>(imactivatemap-off-' . cmd . ') <SID>imiactivate(0, "' . cmd . '")'
   endfor
   " `/`,`?`は&imsを設定。&imiを設定すると直後の`a`等に影響するので
@@ -143,9 +137,8 @@ function! s:mapimactivate(prefix)
   for cmd in g:imactivatemap_imicmdlist
     " nmapだとcと組み合わせた際にf,tが使えないのでmap
     execute 'map <unique>' a:prefix . cmd '<Plug>(imactivatemap-on-' . cmd . ')'
-    if index(s:imioffcmdlist, cmd) >= 0
-      execute 'map <unique>' cmd '<Plug>(imactivatemap-off-' . cmd . ')'
-    endif
+    " prefix無しコマンドに対しoffをmap。gr,gf,gt直後にa等した際にオフにするため
+    execute 'map <unique>' cmd '<Plug>(imactivatemap-off-' . cmd . ')'
     if g:imactivatemap_mapuppercase && cmd =~ '\u'
       execute 'map <unique>' prefixupper . cmd '<Plug>(imactivatemap-on-' . cmd . ')'
     endif
