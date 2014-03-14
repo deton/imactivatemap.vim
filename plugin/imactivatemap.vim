@@ -142,18 +142,18 @@ function! s:mapimactivate(prefix)
   let prefixupper = toupper(a:prefix)
   for cmd in g:imactivatemap_imicmdlist
     " nmapだとcと組み合わせた際にf,tが使えないのでmap
-    execute 'map' a:prefix . cmd '<Plug>(imactivatemap-on-' . cmd . ')'
+    execute 'map <unique>' a:prefix . cmd '<Plug>(imactivatemap-on-' . cmd . ')'
     if index(s:imioffcmdlist, cmd) >= 0
-      execute 'map' cmd '<Plug>(imactivatemap-off-' . cmd . ')'
+      execute 'map <unique>' cmd '<Plug>(imactivatemap-off-' . cmd . ')'
     endif
     if g:imactivatemap_mapuppercase && cmd =~ '\u'
-      execute 'map' prefixupper . cmd '<Plug>(imactivatemap-on-' . cmd . ')'
+      execute 'map <unique>' prefixupper . cmd '<Plug>(imactivatemap-on-' . cmd . ')'
     endif
   endfor
-  execute 'map' a:prefix . '/ <Plug>(imactivatemap-on-/)'
-  execute 'map' a:prefix . '? <Plug>(imactivatemap-on-?)'
-  map / <Plug>(imactivatemap-off-/)
-  map ? <Plug>(imactivatemap-off-?)
+  execute 'map <unique>' a:prefix . '/ <Plug>(imactivatemap-on-/)'
+  execute 'map <unique>' a:prefix . '? <Plug>(imactivatemap-on-?)'
+  map <unique> / <Plug>(imactivatemap-off-/)
+  map <unique> ? <Plug>(imactivatemap-off-?)
 endfunction
 
 call s:mapplug()
