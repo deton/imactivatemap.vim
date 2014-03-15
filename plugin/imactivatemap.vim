@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " imactivatemap.vim - 日本語IMオンにして編集開始するコマンドを別に定義。
 " Maintainer: KIHARA Hideto <deton@m1.interq.or.jp>
-" Last Change: 2014-03-14
+" Last Change: 2014-03-15
 
 if exists('g:loaded_imactivatemap')
   finish
@@ -107,10 +107,14 @@ augroup ImActivateMap
   autocmd!
   "autocmd BufEnter * call <SID>reset()
   autocmd InsertEnter * call <SID>imcontrol_c()
+  " Insert modeを抜けた時にIMオフにしない設定で使うこともできるように、
+  " InsertLeaveでは、reset()ではなくreset_isccmd()だけ行う。
+  " IMオフにする設定で使う場合は、
+  "  imap <silent> <unique> <Esc> <Esc><Plug>(imactivatemap-reset)
   autocmd InsertLeave * call <SID>reset_isccmd()
 augroup END
 
-" gi, gI, ga, go, gs, gr, gf, gtを上書き。
+" gi, gI, ga, go, gs, gr, gf, gt, g?を上書き。
 "noremap qf gf
 "noremap gz G
 
