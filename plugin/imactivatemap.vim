@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " imactivatemap.vim - 日本語IMオンにして編集開始するコマンドを別に定義。
 " Maintainer: KIHARA Hideto <deton@m1.interq.or.jp>
-" Last Change: 2014-03-15
+" Last Change: 2015-11-23
 
 if exists('g:loaded_imactivatemap')
   finish
@@ -65,7 +65,7 @@ function! s:reset()
 endfunction
 
 " Insert modeをEscで抜けるとIMオフになるように設定するには、
-"  imap <silent> <unique> <Esc> <Esc><Plug>(imactivatemap-reset)
+"  imap <silent> <Esc> <Esc><Plug>(imactivatemap-reset)
 nnoremap <script> <silent> <Plug>(imactivatemap-reset) :<C-U>call <SID>reset()<CR>
 
 " 'a','c','f'等に対してIMオン/オフを行う。
@@ -110,7 +110,7 @@ augroup ImActivateMap
   " Insert modeを抜けた時にIMオフにしない設定で使うこともできるように、
   " InsertLeaveでは、reset()ではなくreset_isccmd()だけ行う。
   " IMオフにする設定で使う場合は、
-  "  imap <silent> <unique> <Esc> <Esc><Plug>(imactivatemap-reset)
+  "  imap <silent> <Esc> <Esc><Plug>(imactivatemap-reset)
   autocmd InsertLeave * call <SID>reset_isccmd()
 augroup END
 
@@ -123,16 +123,25 @@ let s:imicmdlist = ['i','I','a','A','o','O','s','S','c','C','r','R','f','F','t',
 " <Plug>をmap
 function! s:mapplug()
   for cmd in s:imicmdlist
+    let retcmd = cmd
+    if maparg(cmd) != ''
+      let retcmd = ''
+    endif
     " nnoremapだとcと組み合わせた際にf,tが使えないのでnoremap
-    execute 'noremap <expr> <Plug>(imactivatemap-on-' . cmd . ') <SID>imiactivate(1, "' . cmd . '")'
+    execute 'noremap <expr> <Plug>(imactivatemap-on-' . cmd . ') <SID>imiactivate(1, "' . retcmd . '")'
     " offもmap。gr,gf,gt直後にa等した際にオフにするため
-    execute 'noremap <expr> <Plug>(imactivatemap-off-' . cmd . ') <SID>imiactivate(0, "' . cmd . '")'
+    execute 'noremap <expr> <Plug>(imactivatemap-off-' . cmd . ') <SID>imiactivate(0, "' . retcmd . '")'
   endfor
+
   " `/`,`?`は&imsを設定。&imiを設定すると直後の`a`等に影響するので
-  noremap <expr> <Plug>(imactivatemap-on-/) <SID>imsactivate(1, '/')
-  noremap <expr> <Plug>(imactivatemap-on-?) <SID>imsactivate(1, '?')
-  noremap <expr> <Plug>(imactivatemap-off-/) <SID>imsactivate(0, '/')
-  noremap <expr> <Plug>(imactivatemap-off-?) <SID>imsactivate(0, '?')
+  for cmd in ['/', '?']
+    let retcmd = cmd
+    if maparg(cmd) != ''
+      let retcmd = ''
+    endif
+    execute 'noremap <expr> <Plug>(imactivatemap-on-' . cmd . ') <SID>imsactivate(1, "' . retcmd . '")'
+    execute 'noremap <expr> <Plug>(imactivatemap-off-' . cmd . ') <SID>imsactivate(0, "' . retcmd . '")'
+  endfor
 endfunction
 
 " IMオンで編集開始するためのmapを登録
@@ -140,17 +149,17 @@ function! s:mapimactivate(prefix)
   let prefixupper = toupper(a:prefix)
   for cmd in g:imactivatemap_imicmdlist
     " nmapだとcと組み合わせた際にf,tが使えないのでmap
-    execute 'map <unique>' a:prefix . cmd '<Plug>(imactivatemap-on-' . cmd . ')'
+    execute 'map ' a:prefix . cmd '<Plug>(imactivatemap-on-' . cmd . ')' . maparg(cmd)
     " prefix無しコマンドに対しoffをmap。gr,gf,gt直後にa等した際にオフにするため
-    execute 'map <unique>' cmd '<Plug>(imactivatemap-off-' . cmd . ')'
+    execute 'map ' cmd '<Plug>(imactivatemap-off-' . cmd . ')' . maparg(cmd)
     if g:imactivatemap_mapuppercase && cmd =~ '\u'
-      execute 'map <unique>' prefixupper . cmd '<Plug>(imactivatemap-on-' . cmd . ')'
+      execute 'map ' prefixupper . cmd '<Plug>(imactivatemap-on-' . cmd . ')' . maparg(cmd)
     endif
   endfor
-  execute 'map <unique>' a:prefix . '/ <Plug>(imactivatemap-on-/)'
-  execute 'map <unique>' a:prefix . '? <Plug>(imactivatemap-on-?)'
-  map <unique> / <Plug>(imactivatemap-off-/)
-  map <unique> ? <Plug>(imactivatemap-off-?)
+  execute 'map ' a:prefix . '/ <Plug>(imactivatemap-on-/)' . maparg('/')
+  execute 'map ' a:prefix . '? <Plug>(imactivatemap-on-?)' . maparg('?')
+  execute 'map / <Plug>(imactivatemap-off-/)' . maparg('/')
+  execute 'map ? <Plug>(imactivatemap-off-?)' . maparg('?')
 endfunction
 
 call s:mapplug()
