@@ -27,8 +27,8 @@ vi的には、日本語入力IMオンにしてInsert modeを開始するコマ�
 * 新たなモードの追加無しに、vi操作中に日本語編集を融合
   ([日本語入力固定モード](https://sites.google.com/site/fudist/Home/vim-nihongo-ban/vim-japanese/ime-control)
   のように、IMEオン固定モードとIMEオフ固定モードを追加して切り替えるのではなく)
- * `が`までの文字列をIMオフで編集する`cgtが`や、
-   `h`までの文字列をIMオンで編集する`gcth`等の組み合わせも可。
+  * `が`までの文字列をIMオフで編集する`cgtが`や、
+    `h`までの文字列をIMオンで編集する`gcth`等の組み合わせも可。
 * 現在の日本語入力モードがオンかオフかを意識しなくて良い。
   `ga`でInsert modeを始めれば常に日本語入力オンで入力できますし、
   `a`で始めれば常に日本語入力オフで入力できます。
@@ -63,6 +63,9 @@ Insert modeを抜けてもオフにしない方がいいかもしれません。
 * Vim以外のアプリではIMオン/オフ操作が必要なので、操作の統一性が無くなるため、
   意識のスイッチが必要。
   (Vimを使う時点である程度スイッチしているので慣れればほぼ無意識にできるはず?)
+* Insert mode中のIM切り替えを使わない形で操作して、
+  ASCII・日本語混在文字列挿入が別になってしまうと、
+  `.`での繰り返しができなくて、しまった、となる場合あり。
 
 ## mapするキー
 デフォルトでは、日本語入力IMオンにして編集を開始する以下のキーをmapします。
@@ -90,9 +93,9 @@ IMのオン/オフの切り替え制御は、デフォルトでは
 
 * [日本語入力固定モード](https://sites.google.com/site/fudist/Home/vim-nihongo-ban/vim-japanese/ime-control)
 * `'imactivatekey'`関係
- * https://github.com/koron/imcsc-vim/
- * [Ubuntu上のVimでIME(ibus制御)](http://www.kaoriya.net/blog/2013/07/15/)
- * [CUIでもimaf/imsfを使いたい - Issue #444 - vim-jp/issues - GitHub](https://github.com/vim-jp/issues/issues/444)
+  * https://github.com/koron/imcsc-vim/
+  * [Ubuntu上のVimでIME(ibus制御)](http://www.kaoriya.net/blog/2013/07/15/)
+  * [CUIでもimaf/imsfを使いたい - Issue #444 - vim-jp/issues - GitHub](https://github.com/vim-jp/issues/issues/444)
 
 IM切り替え方法のカスタマイズをしたい場合は、
 IM切り替えを行う関数を定義して、

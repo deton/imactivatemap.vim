@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " imactivatemap.vim - 日本語IMオンにして編集開始するコマンドを別に定義。
 " Maintainer: KIHARA Hideto <deton@m1.interq.or.jp>
-" Last Change: 2015-11-23
+" Last Change: 2023-04-01
 
 if exists('g:loaded_imactivatemap')
   finish
@@ -13,6 +13,14 @@ let g:loaded_imactivatemap = 1
 " gf等を上書きしたくない場合、g以外のprefixを指定
 if !exists('g:imactivatemap_prefixkey')
   let g:imactivatemap_prefixkey = 'g'
+endif
+
+" Insert modeを抜ける時にimactivatemapのreset(IMオフ)を行う。
+" <Esc>のimapは、カーソルキーが使えなくなるなど副作用が大きいので、
+" InsertLeaveでresetを行う。
+" ただし、i_CTRL-Oでもresetされるので、意図せずIMオフになる場合あり。
+if !exists('g:imactivatemap_resetonleave')
+  let g:imactivatemap_resetonleave = 0
 endif
 
 " 'gI'に加え同機能を'GI'にもmapするかどうか
@@ -103,15 +111,23 @@ function! s:reset_isccmd()
   let s:isccmd = 0
 endfunction
 
+function! s:reset_onleave()
+  if g:imactivatemap_resetonleave
+    call s:reset()
+  else
+    call s:reset_isccmd()
+  endif
+endfunction
+
 augroup ImActivateMap
   autocmd!
   "autocmd BufEnter * call <SID>reset()
   autocmd InsertEnter * call <SID>imcontrol_c()
-  " Insert modeを抜けた時にIMオフにしない設定で使うこともできるように、
+  " Insert modeを抜けた時に(CTRL-Oによる一時的な場合にも)
+  " IMオフにしない設定で使うこともできるように、
   " InsertLeaveでは、reset()ではなくreset_isccmd()だけ行う。
-  " IMオフにする設定で使う場合は、
-  "  imap <silent> <Esc> <Esc><Plug>(imactivatemap-reset)
-  autocmd InsertLeave * call <SID>reset_isccmd()
+  " IMオフにする設定で使う場合は、let g:imactivatemap_resetonleave = 1
+  autocmd InsertLeave * call <SID>reset_onleave()
 augroup END
 
 " gi, gI, ga, go, gs, gr, gf, gt, g?を上書き。
